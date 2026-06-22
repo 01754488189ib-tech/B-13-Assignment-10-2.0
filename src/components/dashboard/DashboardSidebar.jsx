@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "next/next";
 import { usePathname } from "next/navigation";
 import {
   House,
@@ -11,7 +11,7 @@ import {
   Gear,
   Briefcase,
   Envelope,
-  Users,
+  Persons,
   CreditCard,
 } from "@gravity-ui/icons";
 
@@ -50,7 +50,7 @@ export default function DashboardSidebar({ userRole = "user" }) {
 
   const adminLinks = [
     { label: "Admin Panel", href: "/dashboard/admin", icon: House },
-    { label: "Manage Users", href: "/dashboard/admin/users", icon: Users },
+    { label: "Manage Users", href: "/dashboard/admin/users", icon: Persons },
     {
       label: "Manage All Ebooks",
       href: "/dashboard/admin/ebooks",
