@@ -15,37 +15,31 @@ const genres = [
   {
     name: "Sci-Fi",
     icon: Rocket,
-    count: "142 books",
     bg: "hover:border-blue-500/30 hover:bg-blue-950/10",
   },
   {
     name: "Fantasy",
     icon: Compass,
-    count: "189 books",
     bg: "hover:border-purple-500/30 hover:bg-purple-950/10",
   },
   {
     name: "Romance",
     icon: Flame,
-    count: "210 books",
     bg: "hover:border-rose-500/30 hover:bg-rose-950/10",
   },
   {
     name: "Mystery",
     icon: Key,
-    count: "95 books",
     bg: "hover:border-amber-500/30 hover:bg-amber-950/10",
   },
   {
     name: "Horror",
     icon: LayoutHeaderCells,
-    count: "78 books",
     bg: "hover:border-red-500/30 hover:bg-red-950/10",
   },
   {
     name: "Fiction",
     icon: Bookmark,
-    count: "312 books",
     bg: "hover:border-teal-500/30 hover:bg-teal-950/10",
   },
 ];
@@ -79,12 +73,9 @@ export default function EbookGenres() {
                   <div className="h-12 w-12 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-center text-zinc-300">
                     <IconComponent className="h-5 w-5" />
                   </div>
-                  <h3 className="text-sm font-bold text-white mt-4">
+                  <h3 className="text-sm font-bold text-white mt-4 text-center">
                     {genre.name}
                   </h3>
-                  <span className="text-xs text-zinc-600 mt-1">
-                    {genre.count}
-                  </span>
                 </motion.div>
               </Link>
             );

@@ -43,3 +43,7 @@ export async function getUserPurchases() {
 export async function getAdminEbooks() {
   return protectedFetch("/api/admin/ebooks");
 }
+
+export async function getTopWriters() {
+  return serverFetch("/api/top-writers");
+}
