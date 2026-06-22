@@ -39,7 +39,7 @@ export default function TopWriters() {
           Top Literary Pioneers
         </h2>
         <p className="text-sm text-zinc-500 mt-2">
-          Recognizing the platform's leading writers based on total volume of
+          Recognizing the platform and leading writers based on total volume of
           book transactions.
         </p>
       </div>

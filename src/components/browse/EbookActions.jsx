@@ -3,15 +3,43 @@
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { Bookmark } from "@gravity-ui/icons";
+import { addBookmark, deleteBookmark } from "@/lib/actions/bookmarks";
 
-export default function EbookActions({ ebookId, isWriter, isSold, user }) {
-  const [isBookmarked, setIsBookmarked] = useState(false);
+export default function EbookActions({
+  ebookId,
+  isWriter,
+  isSold,
+  user,
+  initialBookmarked,
+}) {
+  const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
+  const [loading, setLoading] = useState(false);
+
+  async function handleBookmark() {
+    if (!user) {
+      window.location.href = `/auth/signin?redirect=/browse/${ebookId}`;
+      return;
+    }
+    setLoading(true);
+    if (isBookmarked) {
+      const res = await deleteBookmark(ebookId);
+      if (res.deletedCount > 0 || res.acknowledged) {
+        setIsBookmarked(false);
+      }
+    } else {
+      const res = await addBookmark(ebookId);
+      if (res.insertedId) {
+        setIsBookmarked(true);
+      }
+    }
+    setLoading(false);
+  }
 
   return (
     <div className="flex gap-3 flex-wrap sm:flex-nowrap">
-      {/* Bookmark Toggle */}
       <Button
-        onClick={() => setIsBookmarked(!isBookmarked)}
+        disabled={loading}
+        onClick={handleBookmark}
         variant="bordered"
         className={`h-14 px-5 rounded-2xl transition border-white/10 ${
           isBookmarked
@@ -23,7 +51,6 @@ export default function EbookActions({ ebookId, isWriter, isSold, user }) {
         {isBookmarked ? "Bookmarked" : "Bookmark Ebook"}
       </Button>
 
-      {/* Stripe Checkout Form Wrapper */}
       <form action="/api/checkout_sessions" method="POST" className="w-full">
         <input type="hidden" name="checkout_type" value="purchase" />
         <input type="hidden" name="ebook_id" value={ebookId} />

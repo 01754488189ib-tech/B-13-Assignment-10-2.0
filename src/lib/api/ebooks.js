@@ -27,3 +27,19 @@ export async function getAdminTransactions() {
 export async function getAdminAnalytics() {
   return protectedFetch("/api/admin/analytics");
 }
+
+export async function getBookmarks() {
+  return protectedFetch("/api/bookmarks");
+}
+
+export async function getUserPurchasedEbooks() {
+  return protectedFetch("/api/user/purchased-ebooks");
+}
+
+export async function getUserPurchases() {
+  return protectedFetch("/api/user/purchases");
+}
+
+export async function getAdminEbooks() {
+  return protectedFetch("/api/admin/ebooks");
+}

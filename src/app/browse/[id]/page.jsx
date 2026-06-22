@@ -7,7 +7,7 @@ import {
   ChevronRight,
   Sparkles,
 } from "@gravity-ui/icons";
-import { getEbookById } from "@/lib/api/ebooks";
+import { getEbookById, getBookmarks } from "@/lib/api/ebooks";
 import { getUserSession } from "@/lib/core/session";
 import EbookActions from "@/components/browse/EbookActions";
 
@@ -29,12 +29,15 @@ export default async function EbookDetailsPage({ params }) {
   }
 
   const user = await getUserSession();
-
-  // Security Checks
   const isWriter = user && user.id === ebook.writerId;
   const isSold = ebook.status === "Sold";
 
-  // Date Formatter
+  let initialBookmarked = false;
+  if (user) {
+    const bookmarks = (await getBookmarks()) || [];
+    initialBookmarked = bookmarks.some((b) => b.ebookId === ebook._id);
+  }
+
   const formattedDate = new Date(ebook.createdAt).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -44,7 +47,6 @@ export default async function EbookDetailsPage({ params }) {
   return (
     <div className="min-h-screen bg-[#050508] text-zinc-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
-        {/* Breadcrumbs */}
         <div className="flex items-center gap-2 text-xs text-zinc-500 mb-8 select-none">
           <Link href="/" className="hover:text-zinc-300 transition">
             Home
@@ -59,7 +61,6 @@ export default async function EbookDetailsPage({ params }) {
           </span>
         </div>
 
-        {/* Back Link */}
         <Link
           href="/browse"
           className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-400 hover:text-white transition mb-10 group"
@@ -68,18 +69,22 @@ export default async function EbookDetailsPage({ params }) {
           Back to Ebook Catalog
         </Link>
 
-        {/* Details Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          {/* LEFT COLUMN: Book Cover Art representation */}
           <div className="lg:col-span-5 space-y-6">
             <Card className="relative aspect-[3/4] w-full rounded-[32px] bg-gradient-to-br from-zinc-900 to-black p-8 flex flex-col justify-between overflow-hidden border border-white/5 shadow-2xl">
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
-
               <div
                 className={`w-full h-full rounded-2xl bg-gradient-to-br ${ebook.coverGradient || "from-blue-600 to-purple-800"} p-8 flex flex-col justify-between relative shadow-2xl overflow-hidden border border-white/10`}
               >
-                <div className="absolute inset-0 bg-[radial-gradient(#ffffff04_1px,transparent_1px)] [background-size:20px_20px]" />
-
+                {ebook.coverImage ? (
+                  <img
+                    src={ebook.coverImage}
+                    alt={ebook.title}
+                    className="absolute inset-0 w-full h-full object-cover z-0"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-[radial-gradient(#ffffff04_1px,transparent_1px)] [background-size:20px_20px]" />
+                )}
                 <div className="flex justify-between items-start z-10">
                   <span className="rounded-full bg-black/50 backdrop-blur-md px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white border border-white/10">
                     {ebook.genre}
@@ -88,7 +93,6 @@ export default async function EbookDetailsPage({ params }) {
                     <Sparkles className="w-3 h-3" /> Fable Original
                   </span>
                 </div>
-
                 <div className="z-10">
                   <span className="text-[11px] font-semibold text-white/50 tracking-widest uppercase block mb-1">
                     Exquisite Manuscript
@@ -122,7 +126,6 @@ export default async function EbookDetailsPage({ params }) {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Synopsis and Checkout Interaction Panels */}
           <div className="lg:col-span-7 space-y-8">
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2 items-center">
@@ -133,11 +136,9 @@ export default async function EbookDetailsPage({ params }) {
                   EPUB Edition
                 </span>
               </div>
-
               <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
                 {ebook.title}
               </h1>
-
               <p className="text-sm text-zinc-400">
                 Created by{" "}
                 <Link
@@ -172,7 +173,6 @@ export default async function EbookDetailsPage({ params }) {
                   </span>
                 </div>
               </div>
-
               <div className="bg-white/[0.01] border border-white/5 rounded-2xl p-4 flex items-center gap-3">
                 <CircleDollar className="w-5 h-5 text-amber-500" />
                 <div>
@@ -186,7 +186,6 @@ export default async function EbookDetailsPage({ params }) {
               </div>
             </div>
 
-            {/* Interaction Card */}
             <div className="bg-[#0b0b0f] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
               <div className="flex justify-between items-baseline gap-4 flex-wrap">
                 <div>
@@ -205,12 +204,12 @@ export default async function EbookDetailsPage({ params }) {
                 </div>
               </div>
 
-              {/* Render client-side actions */}
               <EbookActions
                 ebookId={ebook._id}
                 isWriter={isWriter}
                 isSold={isSold}
                 user={user}
+                initialBookmarked={initialBookmarked}
               />
 
               {isSold && (

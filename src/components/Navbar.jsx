@@ -4,15 +4,20 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@heroui/react";
+import { useSession, signOut } from "@/lib/auth-client";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  const mockUser = {
-    name: "John Doe",
-    email: "reader@fable.com",
-    role: "writer",
+  // Real-time authentication stream
+  const { data: session } = useSession();
+  const user = session?.user;
+
+  const handleSignOut = async () => {
+    await signOut({
+      callbackURL: "/",
+    });
   };
 
   const navLinks = [
@@ -26,10 +31,10 @@ export default function Navbar() {
     admin: "/dashboard/admin",
   };
 
-  if (mockUser) {
+  if (user) {
     navLinks.push({
       label: "Dashboard",
-      href: dashboardLinks[mockUser.role] || "/dashboard/user",
+      href: dashboardLinks[user.role] || "/dashboard/user",
     });
   }
 
@@ -52,6 +57,7 @@ export default function Navbar() {
           </div>
         </Link>
 
+        {/* Desktop Menu */}
         <div className="hidden items-center gap-6 md:flex">
           <ul className="flex items-center gap-1 rounded-full border border-white/5 bg-white/[0.02] p-1.5">
             {navLinks.map((link) => (
@@ -73,15 +79,14 @@ export default function Navbar() {
           <div className="h-6 w-px bg-white/10" />
 
           <div className="flex items-center gap-3">
-            {mockUser ? (
-              <div className="flex items-center gap-3">
+            {user ? (
+              <div className="flex items-center gap-4">
                 <span className="text-sm text-zinc-300">
                   Hi,{" "}
-                  <span className="font-semibold text-white">
-                    {mockUser.name}
-                  </span>
+                  <span className="font-semibold text-white">{user.name}</span>
                 </span>
                 <Button
+                  onClick={handleSignOut}
                   variant="flat"
                   className="bg-white/5 text-xs text-zinc-300 hover:bg-white/10 rounded-xl"
                   size="sm"
@@ -109,6 +114,7 @@ export default function Navbar() {
           </div>
         </div>
 
+        {/* Mobile Menu Toggle */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] text-white transition hover:bg-white/10 md:hidden"
@@ -147,6 +153,7 @@ export default function Navbar() {
         </button>
       </div>
 
+      {/* Mobile Menu Dropdown */}
       {isMenuOpen && (
         <div className="border-t border-white/5 bg-[#050508] md:hidden">
           <div className="space-y-3 px-4 py-6">
@@ -169,16 +176,16 @@ export default function Navbar() {
             </ul>
 
             <div className="border-t border-white/5 pt-4">
-              {mockUser ? (
+              {user ? (
                 <div className="space-y-3 px-4">
                   <p className="text-sm text-zinc-400">
                     Signed in as{" "}
                     <span className="font-semibold text-white">
-                      {mockUser.email}
+                      {user.email}
                     </span>
                   </p>
                   <Button
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={handleSignOut}
                     className="w-full bg-white/5 text-white"
                   >
                     Sign Out

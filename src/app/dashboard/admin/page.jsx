@@ -1,5 +1,5 @@
 import { Card } from "@heroui/react";
-import { Users, BookOpen, CreditCard, Star } from "@gravity-ui/icons";
+import { Persons, BookOpen, CreditCard, Star } from "@gravity-ui/icons";
 import { getAdminAnalytics, getAdminTransactions } from "@/lib/api/ebooks";
 
 export default async function AdminDashboard() {
@@ -8,16 +8,18 @@ export default async function AdminDashboard() {
     totalWriters: 0,
     totalEbooks: 0,
     totalRevenue: 0,
+    genreAnalytics: [],
+    monthlySales: [],
   };
 
   const transactions = (await getAdminTransactions()) || [];
-  const recentTx = transactions.slice(0, 5); // display latest 5 logs
+  const recentTx = transactions.slice(0, 5);
 
   const metrics = [
     {
       title: "Registered Users",
       value: `${analytics.totalUsers} Accounts`,
-      icon: Users,
+      icon: Persons,
       bg: "from-blue-600/10 to-indigo-600/5",
       border: "border-blue-500/10",
       color: "text-blue-400",
@@ -48,6 +50,36 @@ export default async function AdminDashboard() {
     },
   ];
 
+  const salesData = analytics.monthlySales || [];
+  const maxSale =
+    salesData.length > 0
+      ? Math.max(...salesData.map((s) => s.totalSales))
+      : 100;
+
+  let pathD = "M 20,130 L 480,130";
+  const circles = [];
+
+  if (salesData.length > 1) {
+    const points = salesData.map((s, idx) => {
+      const x = 20 + idx * (460 / (salesData.length - 1));
+      const val = s.totalSales;
+      const pct = val / (maxSale || 1);
+      const y = 130 - pct * 120;
+      return { x, y };
+    });
+
+    pathD =
+      `M ${points[0].x},${points[0].y} ` +
+      points
+        .slice(1)
+        .map((p) => `L ${p.x},${p.y}`)
+        .join(" ");
+    points.forEach((p) => circles.push({ x: p.x, y: p.y }));
+  } else if (salesData.length === 1) {
+    pathD = "M 20,75 L 480,75";
+    circles.push({ x: 250, y: 75 });
+  }
+
   return (
     <div className="space-y-10">
       <div>
@@ -63,7 +95,6 @@ export default async function AdminDashboard() {
         </p>
       </div>
 
-      {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map((item) => {
           const Icon = item.icon;
@@ -90,16 +121,14 @@ export default async function AdminDashboard() {
         })}
       </div>
 
-      {/* SVG Analytics Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Line Graph */}
         <div className="bg-[#0b0b0f] border border-white/5 p-6 sm:p-8 rounded-3xl space-y-6 shadow-2xl">
           <div>
             <h3 className="text-base font-bold text-white">
               Monthly Sales Volume Trend
             </h3>
             <p className="text-xs text-zinc-500 mt-1">
-              Trace transaction scale for the previous six calendar cycles.
+              Trace transaction scale for the previous calendar cycles.
             </p>
           </div>
 
@@ -110,29 +139,39 @@ export default async function AdminDashboard() {
               className="w-full h-full text-amber-500 overflow-visible relative z-10"
             >
               <path
-                d="M 20,130 C 50,110 100,70 150,90 C 200,110 250,30 300,50 C 350,70 400,20 480,10"
+                d={pathD}
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="3.5"
                 strokeLinecap="round"
               />
-              <circle cx="20" cy="130" r="5" className="fill-amber-500" />
-              <circle cx="150" cy="90" r="5" className="fill-amber-500" />
-              <circle cx="300" cy="50" r="5" className="fill-amber-500" />
-              <circle cx="480" cy="10" r="5" className="fill-amber-500" />
+              {circles.map((c, i) => (
+                <circle
+                  key={i}
+                  cx={c.x}
+                  cy={c.y}
+                  r="5"
+                  className="fill-amber-500"
+                />
+              ))}
             </svg>
           </div>
           <div className="flex justify-between text-[10px] text-zinc-600 font-bold uppercase tracking-wider px-2">
-            <span>Jan</span>
-            <span>Feb</span>
-            <span>Mar</span>
-            <span>Apr</span>
-            <span>May</span>
-            <span>Jun</span>
+            {salesData.length > 0 ? (
+              salesData.map((s) => <span key={s._id}>{s._id}</span>)
+            ) : (
+              <>
+                <span>Jan</span>
+                <span>Feb</span>
+                <span>Mar</span>
+                <span>Apr</span>
+                <span>May</span>
+                <span>Jun</span>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Bar Progress scale */}
         <div className="bg-[#0b0b0f] border border-white/5 p-6 sm:p-8 rounded-3xl space-y-6 shadow-2xl">
           <div>
             <h3 className="text-base font-bold text-white">Ebooks by Genre</h3>
@@ -142,49 +181,43 @@ export default async function AdminDashboard() {
           </div>
 
           <div className="space-y-4 pt-2">
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-semibold">
-                <span className="text-zinc-300">Sci-Fi & Cyberpunk</span>
-                <span className="text-zinc-500">42%</span>
-              </div>
-              <div className="w-full bg-white/[0.02] h-2 rounded-full overflow-hidden">
-                <div
-                  className="bg-amber-500 h-full rounded-full"
-                  style={{ width: "42%" }}
-                />
-              </div>
-            </div>
+            {analytics.genreAnalytics && analytics.genreAnalytics.length > 0 ? (
+              analytics.genreAnalytics.map((g, idx) => {
+                const total = analytics.totalEbooks || 1;
+                const percentage = Math.round((g.count / total) * 100);
+                const colors = [
+                  "bg-amber-500",
+                  "bg-purple-500",
+                  "bg-rose-500",
+                  "bg-blue-500",
+                  "bg-emerald-500",
+                ];
+                const color = colors[idx % colors.length];
 
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-semibold">
-                <span className="text-zinc-300">Fantasy</span>
-                <span className="text-zinc-500">28%</span>
-              </div>
-              <div className="w-full bg-white/[0.02] h-2 rounded-full overflow-hidden">
-                <div
-                  className="bg-purple-500 h-full rounded-full"
-                  style={{ width: "28%" }}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-semibold">
-                <span className="text-zinc-300">Romance</span>
-                <span className="text-zinc-500">18%</span>
-              </div>
-              <div className="w-full bg-white/[0.02] h-2 rounded-full overflow-hidden">
-                <div
-                  className="bg-rose-500 h-full rounded-full"
-                  style={{ width: "18%" }}
-                />
-              </div>
-            </div>
+                return (
+                  <div key={g._id} className="space-y-1.5">
+                    <div className="flex justify-between text-xs font-semibold">
+                      <span className="text-zinc-300">
+                        {g._id || "Uncategorized"}
+                      </span>
+                      <span className="text-zinc-500">{percentage}%</span>
+                    </div>
+                    <div className="w-full bg-white/[0.02] h-2 rounded-full overflow-hidden">
+                      <div
+                        className={`${color} h-full rounded-full`}
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-xs text-zinc-500">No genre data found.</p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* View All Transactions Log */}
       <div className="space-y-4">
         <h2 className="text-lg font-bold text-white pb-3 border-b border-white/5">
           System Transactions Log
