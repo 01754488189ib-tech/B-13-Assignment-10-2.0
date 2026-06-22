@@ -16,13 +16,11 @@ export default function NotFound() {
           system catalog.
         </p>
         <div className="pt-4">
-          <Button
-            as={Link}
-            href="/"
-            className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-xl px-6"
-          >
-            Go Back Home
-          </Button>
+          <Link href="/">
+            <Button className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-xl px-6">
+              Go Back Home
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

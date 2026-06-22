@@ -77,14 +77,14 @@ export default async function UserBookmarksPage() {
                       Remove
                     </Button>
                   </form>
-                  <Button
-                    as={Link}
-                    href={`/browse/${b.ebookId}`}
-                    className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-lg px-4"
-                    size="sm"
-                  >
-                    View
-                  </Button>
+                  <Link href={`/browse/${b.ebookId}`}>
+                    <Button
+                      className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-lg px-4"
+                      size="sm"
+                    >
+                      View
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </Card>

@@ -57,14 +57,14 @@ export default async function PurchasedEbooksPage() {
                 <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-bold uppercase tracking-wider">
                   Unlocked
                 </span>
-                <Button
-                  as={Link}
-                  href={`/browse/${book._id}`}
-                  className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-lg px-4"
-                  size="sm"
-                >
-                  Read Now
-                </Button>
+                <Link href={`/browse/${book._id}`}>
+                  <Button
+                    className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-lg px-4"
+                    size="sm"
+                  >
+                    Read Now
+                  </Button>
+                </Link>
               </div>
             </Card>
           ))}

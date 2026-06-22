@@ -105,7 +105,7 @@ export default async function UserDashboard() {
                       <img
                         src={book.coverImage}
                         className="absolute inset-0 w-full h-full object-cover"
-                        alt={book.title}
+                        alt="Cover"
                       />
                     ) : (
                       <span className="text-xs font-serif font-black text-white/55">
@@ -120,14 +120,14 @@ export default async function UserDashboard() {
                     <p className="text-xs text-zinc-500 mt-1">
                       {book.writerName}
                     </p>
-                    <Button
-                      as={Link}
-                      href={`/browse/${book._id}`}
-                      className="h-7 px-3 bg-white/[0.04] text-zinc-300 hover:bg-white/10 rounded-lg text-[10px] font-bold mt-3"
-                      size="sm"
-                    >
-                      Open Reader
-                    </Button>
+                    <Link href={`/browse/${book._id}`}>
+                      <Button
+                        className="h-7 px-3 bg-white/[0.04] text-zinc-300 hover:bg-white/10 rounded-lg text-[10px] font-bold mt-3"
+                        size="sm"
+                      >
+                        Open Reader
+                      </Button>
+                    </Link>
                   </div>
                 </Card>
               ))}

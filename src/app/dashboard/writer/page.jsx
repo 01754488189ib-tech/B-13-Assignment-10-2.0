@@ -13,20 +13,17 @@ import { getWriterEbooks, getWriterSales } from "@/lib/api/ebooks";
 export default async function WriterDashboardPage() {
   const user = await requireRole("writer");
 
-  // Load writer-specific datasets
   const ebooks = (await getWriterEbooks()) || [];
   const sales = (await getWriterSales()) || [];
 
-  // Compute live metrics
   const totalSalesCount = sales.length;
   const grossEarnings = sales.reduce((acc, curr) => acc + curr.amount, 0);
 
-  // --- VIEW 1: Writer Not Verified, Upgrade Payment Gate Box ---
   if (!user.verifiedWriter) {
     return (
       <div className="max-w-2xl mx-auto my-12 space-y-6">
         <div className="bg-[#0b0b0f] border border-white/5 rounded-3xl p-8 text-center space-y-6 shadow-2xl">
-          <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto border border-amber-500/20 shadow-[0_0_24px_rgba(245,158,11,0.05)]">
+          <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto border border-amber-500/20">
             <Sparkles size={24} className="text-amber-500 animate-pulse" />
           </div>
           <div className="space-y-2">
@@ -74,7 +71,6 @@ export default async function WriterDashboardPage() {
     );
   }
 
-  // --- VIEW 2: Writer Verified, render Full Console Dashboard ---
   return (
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -90,16 +86,13 @@ export default async function WriterDashboardPage() {
             earnings.
           </p>
         </div>
-        <Button
-          as={Link}
-          href="/dashboard/writer/new"
-          className="h-12 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-xl text-xs shrink-0 shadow-lg shadow-amber-500/10 transition-transform hover:-translate-y-0.5"
-        >
-          Publish New Ebook
-        </Button>
+        <Link href="/dashboard/writer/new">
+          <Button className="h-12 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-xl text-xs shrink-0 shadow-lg shadow-amber-500/10 transition-transform hover:-translate-y-0.5">
+            Publish New Ebook
+          </Button>
+        </Link>
       </div>
 
-      {/* Live Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="bg-[#0b0b0f] border border-white/5 p-5 rounded-2xl flex flex-row items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
@@ -144,7 +137,6 @@ export default async function WriterDashboardPage() {
         </Card>
       </div>
 
-      {/* Own Manuscripts List */}
       <div className="space-y-4">
         <h2 className="text-lg font-bold text-white pb-3 border-b border-white/5">
           Manage Manuscripts
@@ -180,15 +172,15 @@ export default async function WriterDashboardPage() {
                       </span>
                     </td>
                     <td className="py-4 px-2 text-right">
-                      <Button
-                        as={Link}
-                        href={`/browse/${book._id}`}
-                        variant="flat"
-                        size="sm"
-                        className="h-8 w-8 min-w-0 bg-white/5 text-zinc-300 hover:bg-white/10 rounded-lg p-0"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </Button>
+                      <Link href={`/browse/${book._id}`}>
+                        <Button
+                          variant="flat"
+                          size="sm"
+                          className="h-8 w-8 min-w-0 bg-white/5 text-zinc-300 hover:bg-white/10 rounded-lg p-0"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -204,7 +196,6 @@ export default async function WriterDashboardPage() {
         )}
       </div>
 
-      {/* Sales Logs */}
       <div className="space-y-4">
         <h2 className="text-lg font-bold text-white pb-3 border-b border-white/5">
           Royalty Sales Logs
