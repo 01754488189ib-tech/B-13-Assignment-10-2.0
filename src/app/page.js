@@ -1,11 +1,15 @@
-import StatsSection from "@/components/StatsSection";
-import Image from "next/image";
+import Hero from "@/components/Hero";
+import FeaturedEbooks from "@/components/FeaturedEbooks";
+import EbookGenres from "@/components/EbookGenres";
+import TopWriters from "@/components/TopWriters";
 
 export default function Home() {
   return (
-    <div>
-      <StatsSection />
-      <div>Main Page</div>
+    <div className="bg-[#050508] overflow-x-hidden">
+      <Hero />
+      <FeaturedEbooks />
+      <EbookGenres />
+      <TopWriters />
     </div>
   );
 }
