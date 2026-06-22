@@ -12,6 +12,10 @@ export async function getWriterEbooks() {
   return protectedFetch("/api/writer/my-ebooks");
 }
 
+export async function getWriterSales() {
+  return protectedFetch("/api/writer/sales");
+}
+
 export async function getAdminUsers() {
   return protectedFetch("/api/admin/users");
 }

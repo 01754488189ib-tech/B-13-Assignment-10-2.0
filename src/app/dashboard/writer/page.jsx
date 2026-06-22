@@ -1,67 +1,82 @@
-"use client";
-
-import { useState } from "react";
-import { Card, Button } from "@heroui/react";
+import Link from "next/link";
+import { Button, Card } from "@heroui/react";
 import {
   BookOpen,
   CreditCard,
   Star,
   Sparkles,
   Pencil,
-  Trash,
 } from "@gravity-ui/icons";
+import { requireRole } from "@/lib/core/session";
+import { getWriterEbooks, getWriterSales } from "@/lib/api/ebooks";
 
-export default function WriterDashboard() {
-  const [ebooks, setEbooks] = useState([
-    {
-      id: "eb_1",
-      title: "Shadows in the Nebula",
-      genre: "Sci-Fi",
-      price: 12.99,
-      status: "Published",
-      salesCount: 42,
-      earnings: 545.58,
-    },
-    {
-      id: "eb_4",
-      title: "Echoes of the Void",
-      genre: "Sci-Fi",
-      price: 19.99,
-      status: "Published",
-      salesCount: 18,
-      earnings: 359.82,
-    },
-    {
-      id: "eb_9",
-      title: "Cybernetic Genesis",
-      genre: "Sci-Fi",
-      price: 15.0,
-      status: "Draft",
-      salesCount: 0,
-      earnings: 0.0,
-    },
-  ]);
+export default async function WriterDashboardPage() {
+  const user = await requireRole("writer");
 
-  const [sales] = useState([
-    {
-      id: "tx_201",
-      ebook: "Shadows in the Nebula",
-      buyer: "John Reader",
-      date: "June 14, 2026",
-      amount: 12.99,
-    },
-    {
-      id: "tx_202",
-      ebook: "Echoes of the Void",
-      buyer: "Sarah Connor",
-      date: "June 20, 2026",
-      amount: 19.99,
-    },
-  ]);
+  // Load writer-specific datasets
+  const ebooks = (await getWriterEbooks()) || [];
+  const sales = (await getWriterSales()) || [];
 
+  // Compute live metrics
+  const totalSalesCount = sales.length;
+  const grossEarnings = sales.reduce((acc, curr) => acc + curr.amount, 0);
+
+  // --- VIEW 1: Writer Not Verified, Upgrade Payment Gate Box ---
+  if (!user.verifiedWriter) {
+    return (
+      <div className="max-w-2xl mx-auto my-12 space-y-6">
+        <div className="bg-[#0b0b0f] border border-white/5 rounded-3xl p-8 text-center space-y-6 shadow-2xl">
+          <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto border border-amber-500/20 shadow-[0_0_24px_rgba(245,158,11,0.05)]">
+            <Sparkles size={24} className="text-amber-500 animate-pulse" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-extrabold text-white tracking-tight">
+              Activate Ebook Publishing Privileges
+            </h2>
+            <p className="text-sm text-zinc-500 max-w-sm mx-auto leading-relaxed">
+              To upload original manuscripts and collect royalty shares,
+              complete a one-time account verification payment.
+            </p>
+          </div>
+
+          <div className="bg-white/[0.01] border border-white/5 p-5 rounded-2xl max-w-sm mx-auto flex items-center justify-between text-left text-xs">
+            <div>
+              <span className="text-zinc-500 block uppercase font-bold text-[9px] tracking-wider">
+                Verification Fee
+              </span>
+              <span className="text-lg font-black text-white">
+                $20.00{" "}
+                <span className="text-xs font-normal text-zinc-500">
+                  / lifetime
+                </span>
+              </span>
+            </div>
+            <span className="text-emerald-400 font-semibold bg-emerald-500/5 px-2 py-0.5 rounded border border-emerald-500/10">
+              Lifetime Access
+            </span>
+          </div>
+
+          <form
+            action="/api/checkout_sessions"
+            method="POST"
+            className="max-w-sm mx-auto"
+          >
+            <input type="hidden" name="checkout_type" value="verification" />
+            <Button
+              type="submit"
+              className="w-full h-12 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-xl text-xs transition duration-200 shadow-xl shadow-amber-500/10"
+            >
+              Verify Writer Account Now
+            </Button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // --- VIEW 2: Writer Verified, render Full Console Dashboard ---
   return (
     <div className="space-y-10">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-semibold uppercase tracking-wider text-amber-500">
@@ -71,165 +86,170 @@ export default function WriterDashboard() {
             Author Console
           </h1>
           <p className="text-sm text-zinc-500 mt-2">
-            Publish new manuscripts, monitor reader transactions, and evaluate
-            royalty earnings.
+            Publish original ebooks, check buyer transactions, and monitor
+            earnings.
           </p>
         </div>
-
-        {/* Creator CTA */}
-        <Button className="h-12 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-xl text-xs shrink-0 shadow-lg shadow-amber-500/10">
-          Upload New Ebook
+        <Button
+          as={Link}
+          href="/dashboard/writer/new"
+          className="h-12 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-xl text-xs shrink-0 shadow-lg shadow-amber-500/10 transition-transform hover:-translate-y-0.5"
+        >
+          Publish New Ebook
         </Button>
       </div>
 
-      {/* Metrics row */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <Card className="bg-[#0b0b0f] border border-white/5 p-5 rounded-2xl">
-          <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4">
-            <BookOpen className="w-4 h-4" />
+      {/* Live Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="bg-[#0b0b0f] border border-white/5 p-5 rounded-2xl flex flex-row items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+            <BookOpen className="w-5 h-5" />
           </div>
-          <span className="text-xs text-zinc-500 block">
-            Total Publications
-          </span>
-          <span className="text-2xl font-black text-white mt-1 block">
-            3 Ebooks
-          </span>
+          <div>
+            <span className="text-xs text-zinc-500 block">
+              Manuscripts Published
+            </span>
+            <span className="text-2xl font-black text-white">
+              {ebooks.length} Ebooks
+            </span>
+          </div>
         </Card>
 
-        <Card className="bg-[#0b0b0f] border border-white/5 p-5 rounded-2xl">
-          <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 mb-4">
-            <Star className="w-4 h-4" />
+        <Card className="bg-[#0b0b0f] border border-white/5 p-5 rounded-2xl flex flex-row items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+            <Star className="w-5 h-5" />
           </div>
-          <span className="text-xs text-zinc-500 block">Copies Sold</span>
-          <span className="text-2xl font-black text-white mt-1 block">
-            60 Volumes
-          </span>
+          <div>
+            <span className="text-xs text-zinc-500 block">
+              Total Copies Sold
+            </span>
+            <span className="text-2xl font-black text-white">
+              {totalSalesCount} Sales
+            </span>
+          </div>
         </Card>
 
-        <Card className="bg-[#0b0b0f] border border-white/5 p-5 rounded-2xl">
-          <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-4">
-            <CreditCard className="w-4 h-4" />
+        <Card className="bg-[#0b0b0f] border border-white/5 p-5 rounded-2xl flex flex-row items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+            <CreditCard className="w-5 h-5" />
           </div>
-          <span className="text-xs text-zinc-500 block">Gross Royalty</span>
-          <span className="text-2xl font-black text-white mt-1 block">
-            $905.40
-          </span>
-        </Card>
-
-        <Card className="bg-[#0b0b0f] border border-white/5 p-5 rounded-2xl">
-          <div className="w-9 h-9 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 mb-4">
-            <Sparkles className="w-4 h-4" />
+          <div>
+            <span className="text-xs text-zinc-500 block">
+              Accrued Royalties
+            </span>
+            <span className="text-2xl font-black text-white">
+              ${grossEarnings.toFixed(2)}
+            </span>
           </div>
-          <span className="text-xs text-zinc-500 block">Creator Status</span>
-          <span className="text-xs font-bold text-emerald-400 bg-emerald-500/5 px-2.5 py-1 rounded border border-emerald-500/20 w-fit mt-1 block">
-            Approved Writer
-          </span>
         </Card>
       </div>
 
-      {/* Main Table: Own Ebooks */}
+      {/* Own Manuscripts List */}
       <div className="space-y-4">
         <h2 className="text-lg font-bold text-white pb-3 border-b border-white/5">
-          Manage Your Manuscripts
+          Manage Manuscripts
         </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-xs text-zinc-400">
-            <thead>
-              <tr className="border-b border-white/5 text-zinc-500">
-                <th className="py-4 px-2">Manuscript Title</th>
-                <th className="py-4 px-2">Genre</th>
-                <th className="py-4 px-2">Standard Price</th>
-                <th className="py-4 px-2">Status</th>
-                <th className="py-4 px-2 text-right">Volume Sold</th>
-                <th className="py-4 px-2 text-right">Royalties</th>
-                <th className="py-4 px-2 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.02] bg-white/[0.01]">
-              {ebooks.map((book) => (
-                <tr key={book.id} className="hover:bg-white/[0.02] transition">
-                  <td className="py-4 px-2 font-semibold text-white">
-                    {book.title}
-                  </td>
-                  <td className="py-4 px-2 text-zinc-300">{book.genre}</td>
-                  <td className="py-4 px-2 text-amber-500 font-bold">
-                    ${book.price.toFixed(2)}
-                  </td>
-                  <td className="py-4 px-2">
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                        book.status === "Published"
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                          : "bg-zinc-800 text-zinc-400 border-white/5"
-                      }`}
-                    >
-                      {book.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-2 text-right font-semibold text-white">
-                    {book.salesCount}
-                  </td>
-                  <td className="py-4 px-2 text-right font-black text-amber-500">
-                    ${book.earnings.toFixed(2)}
-                  </td>
-                  <td className="py-4 px-2 text-right space-x-1">
-                    <Button
-                      variant="flat"
-                      size="sm"
-                      className="h-8 w-8 min-w-0 bg-white/5 text-zinc-300 hover:bg-white/10 rounded-lg p-0"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      variant="flat"
-                      size="sm"
-                      className="h-8 w-8 min-w-0 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg p-0"
-                    >
-                      <Trash className="w-3.5 h-3.5" />
-                    </Button>
-                  </td>
+        {ebooks.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-xs text-zinc-400">
+              <thead>
+                <tr className="border-b border-white/5 text-zinc-500">
+                  <th className="py-4 px-2">Ebook Title</th>
+                  <th className="py-4 px-2">Genre</th>
+                  <th className="py-4 px-2">Pricing</th>
+                  <th className="py-4 px-2">Status</th>
+                  <th className="py-4 px-2 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-white/[0.02]">
+                {ebooks.map((book) => (
+                  <tr
+                    key={book._id}
+                    className="hover:bg-white/[0.01] transition"
+                  >
+                    <td className="py-4 px-2 font-semibold text-white">
+                      {book.title}
+                    </td>
+                    <td className="py-4 px-2 text-zinc-300">{book.genre}</td>
+                    <td className="py-4 px-2 text-amber-500 font-bold">
+                      ${book.price.toFixed(2)}
+                    </td>
+                    <td className="py-4 px-2">
+                      <span className="inline-block px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-wider">
+                        {book.status}
+                      </span>
+                    </td>
+                    <td className="py-4 px-2 text-right">
+                      <Button
+                        as={Link}
+                        href={`/browse/${book._id}`}
+                        variant="flat"
+                        size="sm"
+                        className="h-8 w-8 min-w-0 bg-white/5 text-zinc-300 hover:bg-white/10 rounded-lg p-0"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-10 bg-white/[0.01] border border-white/5 rounded-2xl">
+            <p className="text-zinc-500 text-xs">
+              No manuscripts published yet. Click Publish New Ebook to begin.
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Secondary Table: Recent Royalty Sales */}
+      {/* Sales Logs */}
       <div className="space-y-4">
         <h2 className="text-lg font-bold text-white pb-3 border-b border-white/5">
-          Recent Royalty Sales Log
+          Royalty Sales Logs
         </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-xs text-zinc-400">
-            <thead>
-              <tr className="border-b border-white/5 text-zinc-500">
-                <th className="py-4 px-2">Transaction ID</th>
-                <th className="py-4 px-2">Ebook Purchased</th>
-                <th className="py-4 px-2">Buyer Account</th>
-                <th className="py-4 px-2">Date Purchased</th>
-                <th className="py-4 px-2 text-right">Earning Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.02]">
-              {sales.map((item) => (
-                <tr key={item.id} className="hover:bg-white/[0.01]">
-                  <td className="py-4 px-2 font-mono text-zinc-500">
-                    {item.id}
-                  </td>
-                  <td className="py-4 px-2 font-semibold text-zinc-200">
-                    {item.ebook}
-                  </td>
-                  <td className="py-4 px-2 text-zinc-400">{item.buyer}</td>
-                  <td className="py-4 px-2 text-zinc-500">{item.date}</td>
-                  <td className="py-4 px-2 text-right font-bold text-amber-500">
-                    ${item.amount.toFixed(2)}
-                  </td>
+        {sales.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-xs text-zinc-400">
+              <thead>
+                <tr className="border-b border-white/5 text-zinc-500">
+                  <th className="py-4 px-2">Transaction ID</th>
+                  <th className="py-4 px-2">Purchased By</th>
+                  <th className="py-4 px-2">Purchase Date</th>
+                  <th className="py-4 px-2 text-right">Amount Earned</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-white/[0.02]">
+                {sales.map((log) => (
+                  <tr
+                    key={log._id}
+                    className="hover:bg-white/[0.01] transition"
+                  >
+                    <td className="py-4 px-2 font-mono text-zinc-500">
+                      {log.transactionId}
+                    </td>
+                    <td className="py-4 px-2 text-zinc-300">
+                      {log.buyerEmail}
+                    </td>
+                    <td className="py-4 px-2 text-zinc-400">
+                      {new Date(log.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-4 px-2 text-right font-bold text-amber-500">
+                      ${log.amount.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-10 bg-white/[0.01] border border-white/5 rounded-2xl">
+            <p className="text-zinc-500 text-xs">
+              No royalty sales recorded yet.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
