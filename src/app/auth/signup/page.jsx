@@ -2,21 +2,73 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Card, Button } from "@heroui/react";
 import { Eye, EyeSlash, At, ShieldKeyhole, Person } from "@gravity-ui/icons";
+import { authClient } from "@/lib/auth-client";
 
 export default function SignupPage() {
-  const [role, setRole] = useState("user"); // Options: "user" (Reader) or "writer"
+  const router = useRouter();
+  const [role, setRole] = useState("user");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isVisible, setIsVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const toggleVisibility = () => setIsVisible((prev) => !prev);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage("");
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMessage("Password must be at least 6 characters.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await authClient.signUp.email({
+        email,
+        password,
+        name,
+        role,
+        verifiedWriter: false,
+        callbackURL: "/",
+      });
+
+      if (error) {
+        setErrorMessage(error.message || "Registration failed. Try again.");
+      } else {
+        router.push("/");
+        router.refresh();
+      }
+    } catch (err) {
+      setErrorMessage("An unexpected network error occurred.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+    } catch (err) {
+      setErrorMessage("Could not initialize Google authentication.");
+    }
   };
 
   return (
@@ -33,9 +85,14 @@ export default function SignupPage() {
           </p>
         </div>
 
+        {/* Error Alert panel */}
+        {errorMessage && (
+          <div className="mb-4 p-3.5 text-xs font-semibold rounded-xl bg-red-500/10 border border-red-500/20 text-red-400">
+            {errorMessage}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          
-          {/* 1. Full Name */}
           <div className="flex flex-col gap-2">
             <label className="text-xs font-semibold text-zinc-400">
               Full Name
@@ -53,7 +110,6 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* 2. Email Address */}
           <div className="flex flex-col gap-2">
             <label className="text-xs font-semibold text-zinc-400">
               Email Address
@@ -71,7 +127,6 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* 3. Password */}
           <div className="flex flex-col gap-2">
             <label className="text-xs font-semibold text-zinc-400">
               Password
@@ -91,12 +146,15 @@ export default function SignupPage() {
                 onClick={toggleVisibility}
                 className="text-zinc-500 hover:text-zinc-300 transition shrink-0 ml-3 outline-none"
               >
-                {isVisible ? <EyeSlash className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {isVisible ? (
+                  <EyeSlash className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
 
-          {/* 4. Confirm Password */}
           <div className="flex flex-col gap-2">
             <label className="text-xs font-semibold text-zinc-400">
               Confirm Password
@@ -114,7 +172,7 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* 5. Role Selection */}
+          {/* Role Selection */}
           <div className="flex flex-col gap-2">
             <label className="text-xs font-semibold text-zinc-400">
               Choose your primary role
@@ -145,15 +203,15 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* Submit */}
           <Button
             type="submit"
+            isLoading={isLoading}
+            disabled={isLoading}
             className="w-full h-12 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm mt-4 shadow-xl shadow-amber-500/5 transition-transform hover:-translate-y-0.5"
           >
             Create Account
           </Button>
 
-          {/* Sign in redirect */}
           <div className="text-center pt-4 border-t border-white/5 mt-4 text-xs text-zinc-500">
             Already have an account?{" "}
             <Link
@@ -163,7 +221,6 @@ export default function SignupPage() {
               Sign in
             </Link>
           </div>
-
         </form>
       </Card>
     </div>
