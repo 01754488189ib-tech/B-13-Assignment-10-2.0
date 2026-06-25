@@ -32,33 +32,14 @@ export const auth = betterAuth({
   }),
   user: {
     additionalFields: {
-      userRole: {
+      role: {
         type: "string",
         defaultValue: "user",
+        input: true,
       },
       verifiedWriter: {
         type: "boolean",
         defaultValue: false,
-      },
-    },
-  },
-  databaseHooks: {
-    user: {
-      create: {
-        after: async (user) => {
-          if (user.userRole && user.userRole !== "user") {
-            const client = new MongoClient(process.env.MONGO_DB_URI);
-            await client.connect();
-            const db = client.db(process.env.AUTH_DB_NAME);
-            await db
-              .collection("user")
-              .updateOne(
-                { $or: [{ id: user.id }, { _id: user.id }] },
-                { $set: { role: user.userRole } },
-              );
-            await client.close();
-          }
-        },
       },
     },
   },

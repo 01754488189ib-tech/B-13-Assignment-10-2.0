@@ -4,16 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Card, Button } from "@heroui/react";
-import { Eye, EyeSlash, At, ShieldKeyhole, Person } from "@gravity-ui/icons";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [role, setRole] = useState("user");
-  const [name, setName] = useState("");
+
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("user");
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -38,7 +38,7 @@ export default function SignupPage() {
     }
 
     try {
-      const { data, error } = await authClient.signUp.email({
+      const { error } = await authClient.signUp.email({
         email,
         password,
         name,
@@ -85,7 +85,6 @@ export default function SignupPage() {
           </p>
         </div>
 
-        {/* Error Alert panel */}
         {errorMessage && (
           <div className="mb-4 p-3.5 text-xs font-semibold rounded-xl bg-red-500/10 border border-red-500/20 text-red-400">
             {errorMessage}
@@ -98,7 +97,6 @@ export default function SignupPage() {
               Full Name
             </label>
             <div className="relative flex items-center bg-white/[0.02] border border-white/5 rounded-xl px-3.5 h-12 focus-within:border-amber-500/50 transition">
-              <Person className="text-zinc-500 shrink-0 mr-3" />
               <input
                 type="text"
                 placeholder="John Doe"
@@ -115,7 +113,6 @@ export default function SignupPage() {
               Email Address
             </label>
             <div className="relative flex items-center bg-white/[0.02] border border-white/5 rounded-xl px-3.5 h-12 focus-within:border-amber-500/50 transition">
-              <At className="text-zinc-500 shrink-0 mr-3" />
               <input
                 type="email"
                 placeholder="you@example.com"
@@ -132,7 +129,6 @@ export default function SignupPage() {
               Password
             </label>
             <div className="relative flex items-center bg-white/[0.02] border border-white/5 rounded-xl px-3.5 h-12 focus-within:border-amber-500/50 transition">
-              <ShieldKeyhole className="text-zinc-500 shrink-0 mr-3" />
               <input
                 type={isVisible ? "text" : "password"}
                 placeholder="•••••••• (Min 6 characters)"
@@ -146,11 +142,7 @@ export default function SignupPage() {
                 onClick={toggleVisibility}
                 className="text-zinc-500 hover:text-zinc-300 transition shrink-0 ml-3 outline-none"
               >
-                {isVisible ? (
-                  <EyeSlash className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
+                {isVisible ? "Hide" : "Show"}
               </button>
             </div>
           </div>
@@ -160,7 +152,6 @@ export default function SignupPage() {
               Confirm Password
             </label>
             <div className="relative flex items-center bg-white/[0.02] border border-white/5 rounded-xl px-3.5 h-12 focus-within:border-amber-500/50 transition">
-              <ShieldKeyhole className="text-zinc-500 shrink-0 mr-3" />
               <input
                 type={isVisible ? "text" : "password"}
                 placeholder="••••••••"
@@ -172,7 +163,6 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* Role Selection */}
           <div className="flex flex-col gap-2">
             <label className="text-xs font-semibold text-zinc-400">
               Choose your primary role
