@@ -8,6 +8,8 @@ import {
   getUserPurchases,
 } from "@/lib/api/ebooks";
 
+export const dynamic = "force-dynamic";
+
 export default async function UserDashboard() {
   const user = await requireRole("user");
 
@@ -37,7 +39,7 @@ export default async function UserDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="bg-[#0b0b0f] border border-white/5 p-5 rounded-2xl flex flex-row items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+          <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
             <BookOpen className="w-5 h-5" />
           </div>
           <div>
@@ -146,8 +148,18 @@ export default async function UserDashboard() {
             Reader Account Profile
           </h2>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 font-black">
-              {user.name ? user.name[0].toUpperCase() : "R"}
+            <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 bg-zinc-900 flex items-center justify-center shrink-0">
+              {user.image ? (
+                <img
+                  src={user.image}
+                  className="w-full h-full object-cover"
+                  alt="Avatar"
+                />
+              ) : (
+                <span className="text-sm font-bold text-amber-500">
+                  {user.name ? user.name[0].toUpperCase() : "R"}
+                </span>
+              )}
             </div>
             <div className="min-w-0 flex-1">
               <span className="text-sm font-bold text-white block truncate">
@@ -188,7 +200,12 @@ export default async function UserDashboard() {
                 {purchaseHistory.map((tx) => (
                   <tr key={tx._id} className="hover:bg-white/[0.02] transition">
                     <td className="py-4 px-2 font-mono text-zinc-500">
-                      {tx.transactionId}
+                      <span
+                        className="truncate max-w-[150px] block"
+                        title={tx.transactionId}
+                      >
+                        {tx.transactionId}
+                      </span>
                     </td>
                     <td className="py-4 px-2 font-semibold text-white">
                       {tx.ebookTitle || "Original Ebook"}

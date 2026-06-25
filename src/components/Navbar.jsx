@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button, Avatar } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { Sun, Moon } from "@gravity-ui/icons";
 import { useSession, signOut } from "@/lib/auth-client";
 
@@ -52,7 +52,12 @@ export default function Navbar() {
     });
   }
 
-  const isActive = (path) => pathname === path;
+  const isActive = (path) => {
+    if (path === "/") {
+      return pathname === "/";
+    }
+    return pathname.startsWith(path);
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#050508]/80 backdrop-blur-xl">

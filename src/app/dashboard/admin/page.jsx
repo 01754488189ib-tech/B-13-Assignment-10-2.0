@@ -2,6 +2,8 @@ import { Card } from "@heroui/react";
 import { Persons, BookOpen, CreditCard, Star } from "@gravity-ui/icons";
 import { getAdminAnalytics, getAdminTransactions } from "@/lib/api/ebooks";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboard() {
   const analytics = (await getAdminAnalytics()) || {
     totalUsers: 0,
@@ -57,6 +59,7 @@ export default async function AdminDashboard() {
       : 100;
 
   let pathD = "M 20,130 L 480,130";
+  let fillD = "M 20,130 L 480,130 L 480,130 L 20,130 Z";
   const circles = [];
 
   if (salesData.length > 1) {
@@ -64,7 +67,7 @@ export default async function AdminDashboard() {
       const x = 20 + idx * (460 / (salesData.length - 1));
       const val = s.totalSales;
       const pct = val / (maxSale || 1);
-      const y = 130 - pct * 120;
+      const y = 130 - pct * 110;
       return { x, y };
     });
 
@@ -74,9 +77,16 @@ export default async function AdminDashboard() {
         .slice(1)
         .map((p) => `L ${p.x},${p.y}`)
         .join(" ");
+
+    fillD =
+      `M ${points[0].x},140 ` +
+      points.map((p) => `L ${p.x},${p.y}`).join(" ") +
+      ` L ${points[points.length - 1].x},140 Z`;
+
     points.forEach((p) => circles.push({ x: p.x, y: p.y }));
   } else if (salesData.length === 1) {
     pathD = "M 20,75 L 480,75";
+    fillD = "M 20,75 L 480,75 L 480,140 L 20,140 Z";
     circles.push({ x: 250, y: 75 });
   }
 
@@ -132,27 +142,45 @@ export default async function AdminDashboard() {
             </p>
           </div>
 
-          <div className="w-full h-48 bg-white/[0.01] rounded-2xl flex items-end justify-center px-4 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px)] [background-size:100%_40px]" />
+          <div className="w-full h-48 bg-white/[0.01] rounded-2xl flex items-end justify-center px-4 relative overflow-hidden border border-white/5">
             <svg
               viewBox="0 0 500 150"
               className="w-full h-full text-amber-500 overflow-visible relative z-10"
             >
+              <defs>
+                <linearGradient id="chartGlow" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.0" />
+                </linearGradient>
+              </defs>
+              <g stroke="white" strokeOpacity="0.02" strokeWidth="1">
+                <line x1="20" y1="30" x2="480" y2="30" />
+                <line x1="20" y1="65" x2="480" y2="65" />
+                <line x1="20" y1="100" x2="480" y2="100" />
+              </g>
+              <path d={fillD} fill="url(#chartGlow)" stroke="none" />
               <path
                 d={pathD}
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="3.5"
+                strokeWidth="3"
                 strokeLinecap="round"
               />
               {circles.map((c, i) => (
-                <circle
-                  key={i}
-                  cx={c.x}
-                  cy={c.y}
-                  r="5"
-                  className="fill-amber-500"
-                />
+                <g key={i}>
+                  <circle
+                    cx={c.x}
+                    cy={c.y}
+                    r="8"
+                    className="fill-amber-500/20"
+                  />
+                  <circle
+                    cx={c.x}
+                    cy={c.y}
+                    r="4"
+                    className="fill-amber-500 stroke-black stroke-2"
+                  />
+                </g>
               ))}
             </svg>
           </div>
@@ -236,9 +264,17 @@ export default async function AdminDashboard() {
               </thead>
               <tbody className="divide-y divide-white/[0.02]">
                 {recentTx.map((tx) => (
-                  <tr key={tx._id} className="hover:bg-white/[0.01] transition">
+                  <tr
+                    key={tx._id}
+                    className="hover:bg-white/[0.01] transition font-medium"
+                  >
                     <td className="py-4 px-2 font-mono text-zinc-500">
-                      {tx.transactionId}
+                      <span
+                        className="truncate max-w-[150px] block"
+                        title={tx.transactionId}
+                      >
+                        {tx.transactionId}
+                      </span>
                     </td>
                     <td className="py-4 px-2">
                       <span
@@ -246,13 +282,13 @@ export default async function AdminDashboard() {
                           tx.type === "purchase"
                             ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
                             : "bg-blue-500/10 text-blue-400 border-blue-500/20"
-                        } uppercase tracking-wider`}
+                        }`}
                       >
                         {tx.type}
                       </span>
                     </td>
                     <td className="py-4 px-2 text-zinc-300">{tx.buyerEmail}</td>
-                    <td className="py-4 px-2 text-zinc-500">
+                    <td className="py-4 px-2 text-zinc-400">
                       {new Date(tx.createdAt).toLocaleDateString()}
                     </td>
                     <td className="py-4 px-2 text-right font-bold text-amber-500">

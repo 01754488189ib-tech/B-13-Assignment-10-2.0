@@ -1,6 +1,8 @@
 import { requireRole } from "@/lib/core/session";
 import { getAdminTransactions } from "@/lib/api/ebooks";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminTransactionsPage() {
   await requireRole("admin");
   const transactions = (await getAdminTransactions()) || [];
@@ -39,7 +41,12 @@ export default async function AdminTransactionsPage() {
                   className="hover:bg-white/[0.01] transition-colors"
                 >
                   <td className="py-4 px-6 font-mono text-zinc-500">
-                    {tx.transactionId}
+                    <span
+                      className="truncate max-w-[180px] block"
+                      title={tx.transactionId}
+                    >
+                      {tx.transactionId}
+                    </span>
                   </td>
                   <td className="py-4 px-6">
                     <span
