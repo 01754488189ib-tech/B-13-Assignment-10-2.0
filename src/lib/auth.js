@@ -32,14 +32,27 @@ export const auth = betterAuth({
   }),
   user: {
     additionalFields: {
-      role: {
+      userRole: {
         type: "string",
         defaultValue: "user",
-        input: true,
       },
       verifiedWriter: {
         type: "boolean",
         defaultValue: false,
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          return {
+            data: {
+              ...user,
+              role: user.userRole || "user",
+            },
+          };
+        },
       },
     },
   },

@@ -7,7 +7,7 @@ export const authClient = createAuthClient({
     adminClient(),
     inferAdditionalFields({
       user: {
-        role: {
+        userRole: {
           type: "string",
         },
         verifiedWriter: {
