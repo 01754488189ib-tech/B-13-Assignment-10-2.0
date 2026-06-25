@@ -42,8 +42,19 @@ export default function WriterEbooksTable({ ebooks }) {
                 key={book._id}
                 className="hover:bg-white/[0.01] transition-colors"
               >
-                <td className="py-4 px-6 font-semibold text-white truncate max-w-xs">
-                  {book.title}
+                <td className="py-4 px-6 font-semibold text-white whitespace-nowrap">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 aspect-[3/4] rounded-lg overflow-hidden relative bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/5 shrink-0">
+                      {book.coverImage && (
+                        <img
+                          src={book.coverImage}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          alt="Cover"
+                        />
+                      )}
+                    </div>
+                    <span className="truncate max-w-xs">{book.title}</span>
+                  </div>
                 </td>
                 <td className="py-4 px-6 text-zinc-400">{book.genre}</td>
                 <td className="py-4 px-6 font-semibold text-amber-500">

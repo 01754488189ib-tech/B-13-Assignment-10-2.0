@@ -160,7 +160,18 @@ export default async function WriterDashboardPage() {
                     className="hover:bg-white/[0.01] transition"
                   >
                     <td className="py-4 px-2 font-semibold text-white">
-                      {book.title}
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 aspect-[3/4] rounded-lg overflow-hidden relative bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/5 shrink-0">
+                          {book.coverImage && (
+                            <img
+                              src={book.coverImage}
+                              className="absolute inset-0 w-full h-full object-cover"
+                              alt="Cover"
+                            />
+                          )}
+                        </div>
+                        <span className="truncate max-w-xs">{book.title}</span>
+                      </div>
                     </td>
                     <td className="py-4 px-2 text-zinc-300">{book.genre}</td>
                     <td className="py-4 px-2 text-amber-500 font-bold">
@@ -172,7 +183,7 @@ export default async function WriterDashboardPage() {
                       </span>
                     </td>
                     <td className="py-4 px-2 text-right">
-                      <Link href={`/browse/${book._id}`}>
+                      <Link href={`/dashboard/writer/edit/${book._id}`}>
                         <Button
                           variant="flat"
                           size="sm"

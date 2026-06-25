@@ -1,18 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@heroui/react";
+import { Button, Avatar } from "@heroui/react";
+import { Sun, Moon } from "@gravity-ui/icons";
 import { useSession, signOut } from "@/lib/auth-client";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [theme, setTheme] = useState("dark");
   const pathname = usePathname();
 
-  // Real-time authentication stream
-  const { data: session } = useSession();
+  const { data: session, isPending } = useSession();
   const user = session?.user;
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "dark";
+    setTheme(savedTheme);
+    document.documentElement.className = savedTheme;
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    localStorage.setItem("theme", nextTheme);
+    document.documentElement.className = nextTheme;
+  };
 
   const handleSignOut = async () => {
     await signOut({
@@ -57,7 +71,6 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Desktop Menu */}
         <div className="hidden items-center gap-6 md:flex">
           <ul className="flex items-center gap-1 rounded-full border border-white/5 bg-white/[0.02] p-1.5">
             {navLinks.map((link) => (
@@ -78,13 +91,43 @@ export default function Navbar() {
 
           <div className="h-6 w-px bg-white/10" />
 
+          <button
+            onClick={toggleTheme}
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] text-zinc-400 hover:text-white transition"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </button>
+
           <div className="flex items-center gap-3">
-            {user ? (
+            {isPending ? (
+              <div className="w-8 h-8 rounded-full bg-white/5 animate-pulse" />
+            ) : user ? (
               <div className="flex items-center gap-4">
-                <span className="text-sm text-zinc-300">
-                  Hi,{" "}
-                  <span className="font-semibold text-white">{user.name}</span>
-                </span>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 bg-zinc-900 flex items-center justify-center relative shrink-0">
+                    {user.image ? (
+                      <img
+                        src={user.image}
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-sm font-bold text-amber-500">
+                        {user.name ? user.name[0].toUpperCase() : "U"}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-sm text-zinc-300">
+                    Hi,{" "}
+                    <span className="font-semibold text-white">
+                      {user.name}
+                    </span>
+                  </span>
+                </div>
                 <Button
                   onClick={handleSignOut}
                   variant="flat"
@@ -114,46 +157,57 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu Toggle */}
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] text-white transition hover:bg-white/10 md:hidden"
-        >
-          {isMenuOpen ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          )}
-        </button>
+        <div className="flex items-center gap-3 md:hidden">
+          <button
+            onClick={toggleTheme}
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] text-zinc-400 hover:text-white transition"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] text-white transition hover:bg-white/10"
+          >
+            {isMenuOpen ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
       {isMenuOpen && (
         <div className="border-t border-white/5 bg-[#050508] md:hidden">
           <div className="space-y-3 px-4 py-6">

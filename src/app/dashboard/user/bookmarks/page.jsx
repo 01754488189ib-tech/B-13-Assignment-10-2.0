@@ -6,8 +6,9 @@ import { getBookmarks } from "@/lib/api/ebooks";
 import { deleteBookmark } from "@/lib/actions/bookmarks";
 
 export default async function UserBookmarksPage() {
-  await requireRole("user");
+  const user = await requireRole("user");
   const bookmarks = (await getBookmarks()) || [];
+  const isAdmin = user?.role === "admin";
 
   async function handleRemove(formData) {
     "use server";
@@ -61,30 +62,53 @@ export default async function UserBookmarksPage() {
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between gap-3">
-                <span className="text-sm font-bold text-amber-500">
-                  ${parseFloat(b.ebookPrice).toFixed(2)}
-                </span>
-                <div className="flex gap-2">
-                  <form action={handleRemove}>
+              <div className="mt-6 pt-4 border-t border-white/5 flex flex-col gap-2">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-xs text-zinc-500 uppercase">Price</span>
+                  <span className="text-sm font-bold text-amber-500">
+                    ${parseFloat(b.ebookPrice).toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex gap-2 w-full">
+                  <form action={handleRemove} className="flex-1">
                     <input type="hidden" name="ebookId" value={b.ebookId} />
                     <Button
                       type="submit"
                       variant="flat"
                       size="sm"
-                      className="bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-bold rounded-lg px-3"
+                      className="w-full bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-bold rounded-lg h-9"
                     >
                       Remove
                     </Button>
                   </form>
-                  <Link href={`/browse/${b.ebookId}`}>
+                  {isAdmin ? (
                     <Button
-                      className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-lg px-4"
+                      disabled
+                      className="flex-1 bg-zinc-800 text-zinc-500 rounded-lg text-xs font-bold h-9 cursor-not-allowed"
                       size="sm"
                     >
-                      View
+                      Admin Block
                     </Button>
-                  </Link>
+                  ) : (
+                    <form
+                      action="/api/checkout_sessions"
+                      method="POST"
+                      className="flex-1"
+                    >
+                      <input
+                        type="hidden"
+                        name="checkout_type"
+                        value="purchase"
+                      />
+                      <input type="hidden" name="ebook_id" value={b.ebookId} />
+                      <Button
+                        type="submit"
+                        className="w-full bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-lg h-9"
+                      >
+                        Buy Now
+                      </Button>
+                    </form>
+                  )}
                 </div>
               </div>
             </Card>

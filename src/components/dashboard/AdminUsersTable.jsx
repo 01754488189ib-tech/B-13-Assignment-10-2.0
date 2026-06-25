@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
+import { Person, Briefcase } from "@gravity-ui/icons";
 import {
-  Person,
-  Briefcase,
-  ChevronLeft,
-  ChevronRight,
-  Trash,
-} from "@gravity-ui/icons";
-import { updateUserRole, deleteUser } from "@/lib/actions/users";
+  updateUserRole,
+  deleteUser,
+  banUser,
+  unbanUser,
+} from "@/lib/actions/users";
 
 export default function AdminUsersTable({ users }) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -27,7 +26,7 @@ export default function AdminUsersTable({ users }) {
       const { userId, newRole } = pendingChange;
       await updateUserRole(userId, newRole);
     } catch (error) {
-      console.error("Failed to update user role:", error);
+      console.error(error);
     } finally {
       setIsUpdating(false);
       setIsConfirmOpen(false);
@@ -35,8 +34,22 @@ export default function AdminUsersTable({ users }) {
     }
   };
 
+  const handleBanToggle = async (userId, currentStatus) => {
+    if (currentStatus === "banned") {
+      await unbanUser(userId);
+    } else {
+      if (
+        confirm(
+          "Are you sure you want to suspend this account's platform access?",
+        )
+      ) {
+        await banUser(userId);
+      }
+    }
+  };
+
   const handleDelete = async (userId) => {
-    if (confirm("Are you sure you want to remove this user from Fable?")) {
+    if (confirm("Are you sure you want to permanently remove this user?")) {
       await deleteUser(userId);
     }
   };
@@ -51,7 +64,7 @@ export default function AdminUsersTable({ users }) {
                 <th className="py-5 px-6">User Name</th>
                 <th className="py-5 px-6">Email Address</th>
                 <th className="py-5 px-6">System Role</th>
-                <th className="py-5 px-6">Writer Status</th>
+                <th className="py-5 px-6">Account Status</th>
                 <th className="py-5 px-6 text-right">Actions</th>
               </tr>
             </thead>
@@ -60,6 +73,7 @@ export default function AdminUsersTable({ users }) {
               {users.map((user) => {
                 const userId = user._id || user.id;
                 const userRole = user.role?.toLowerCase() || "user";
+                const isBanned = user.status === "banned";
 
                 return (
                   <tr
@@ -68,8 +82,18 @@ export default function AdminUsersTable({ users }) {
                   >
                     <td className="py-4 px-6 font-semibold text-white whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-xs text-amber-500 font-bold">
-                          {user.name ? user.name[0].toUpperCase() : "U"}
+                        <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 bg-zinc-900 flex items-center justify-center shrink-0">
+                          {user.image ? (
+                            <img
+                              src={user.image}
+                              alt="Avatar"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-xs font-bold text-amber-500">
+                              {user.name ? user.name[0].toUpperCase() : "U"}
+                            </span>
+                          )}
                         </div>
                         <span>{user.name || "Unknown User"}</span>
                       </div>
@@ -98,13 +122,13 @@ export default function AdminUsersTable({ users }) {
                     </td>
 
                     <td className="py-4 px-6 whitespace-nowrap">
-                      {user.verifiedWriter ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          Verified
+                      {isBanned ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                          Suspended
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-zinc-800/40 text-zinc-500 border border-white/5">
-                          Unverified
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          Active
                         </span>
                       )}
                     </td>
@@ -143,6 +167,13 @@ export default function AdminUsersTable({ users }) {
                         )}
 
                         <button
+                          onClick={() => handleBanToggle(userId, user.status)}
+                          className="text-zinc-400 hover:text-red-400 transition pl-3 border-l border-white/5"
+                        >
+                          {isBanned ? "Unban" : "Ban"}
+                        </button>
+
+                        <button
                           onClick={() => handleDelete(userId)}
                           className="text-red-500 hover:text-red-400 transition pl-3 border-l border-white/5"
                         >
@@ -158,7 +189,6 @@ export default function AdminUsersTable({ users }) {
         </div>
       </div>
 
-      {/* Confirmation Dialog Modal */}
       {isConfirmOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="w-full max-w-sm bg-[#0b0b0f] border border-white/5 rounded-2xl p-6 shadow-2xl space-y-6">
