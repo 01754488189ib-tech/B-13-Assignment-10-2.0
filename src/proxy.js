@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
 export function proxy(request) {
-  const sessionToken = request.cookies.get("better-auth.session_token")?.value;
+  const sessionToken =
+    request.cookies.get("better-auth.session_token")?.value ||
+    request.cookies.get("__Secure-better-auth.session_token")?.value;
+
   const path = request.nextUrl.pathname;
 
   if (path.startsWith("/dashboard")) {

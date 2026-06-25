@@ -5,6 +5,8 @@ import TopWriters from "@/components/TopWriters";
 import { getEbooks, getTopWriters } from "@/lib/api/ebooks";
 import { getUserSession } from "@/lib/core/session";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const { ebooks } = (await getEbooks("perPage=6")) || { ebooks: [] };
   const writers = (await getTopWriters()) || [];
