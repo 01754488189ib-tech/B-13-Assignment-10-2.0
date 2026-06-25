@@ -3,12 +3,23 @@ import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { admin } from "better-auth/plugins";
 
-const client = new MongoClient(process.env.MONGO_DB_URI);
+let client;
+
+if (process.env.NODE_ENV === "development") {
+  if (!global._mongoClient) {
+    global._mongoClient = new MongoClient(process.env.MONGO_DB_URI);
+  }
+  client = global._mongoClient;
+} else {
+  client = new MongoClient(process.env.MONGO_DB_URI);
+}
+
 const db = client.db(process.env.AUTH_DB_NAME);
 
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
+    minPasswordLength: 6,
   },
   socialProviders: {
     google: {
@@ -21,13 +32,33 @@ export const auth = betterAuth({
   }),
   user: {
     additionalFields: {
-      role: {
+      userRole: {
         type: "string",
         defaultValue: "user",
       },
       verifiedWriter: {
         type: "boolean",
         defaultValue: false,
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          if (user.userRole && user.userRole !== "user") {
+            const client = new MongoClient(process.env.MONGO_DB_URI);
+            await client.connect();
+            const db = client.db(process.env.AUTH_DB_NAME);
+            await db
+              .collection("user")
+              .updateOne(
+                { $or: [{ id: user.id }, { _id: user.id }] },
+                { $set: { role: user.userRole } },
+              );
+            await client.close();
+          }
+        },
       },
     },
   },
