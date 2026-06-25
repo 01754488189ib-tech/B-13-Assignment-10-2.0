@@ -1,0 +1,29 @@
+[33md8e02c6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{0}: reset: moving to d8e02c6
+[33m32d3b44[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{1}: Branch: renamed refs/heads/main to refs/heads/main
+[33m32d3b44[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{3}: commit: feat: optimize core user workflows and system configurations
+[33md63b787[m HEAD@{4}: reset: moving to d63b787
+[33md8e02c6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{5}: commit: 1. feat: configure project boiler templates with nextjs and tailwindcss config
+[33md63b787[m HEAD@{6}: commit: feat: migrate and bind dynamic top writers endpoint, clear fallback arrays, and deliver mock JSON schemas for DB import
+[33m475166b[m HEAD@{7}: commit: fix: resolve React component prop serialization boundary error in Server Components during production build
+[33m1dc8fdd[m HEAD@{8}: commit: feat: complete user dynamic dashboard, persistent bookmarks, dynamic analytics charts, and missing dashboard pages
+[33m5fb3c0f[m HEAD@{9}: commit: fix(dashboard): correct Gravity UI sidebar navigation icons set
+[33m95a4f0c[m HEAD@{10}: commit: feat(catalog): link home page to live database querying and compose comprehensive README documentation
+[33mf2f2802[m HEAD@{11}: commit: feat(admin): build user role controls table and live database dashboard analytical aggregations
+[33m789a4aa[m HEAD@{12}: commit: feat(writer): construct ebook publishing form with ImgBB uploader and stripe verification upgrades
+[33m2d433c9[m HEAD@{13}: commit: feat(catalog): link details route to live DB querying and embed Stripe checkout forms
+[33maa5ae71[m HEAD@{14}: commit: feat(stripe): implement checkout success callbacks registering ebook purchases and writer elevations
+[33mca67b66[m HEAD@{15}: commit: feat(stripe): build dynamic price-data checkout routing for single books and verification upgrades
+[33me210d03[m HEAD@{16}: commit: feat(catalog): link browse page to Express database with full search and pagination queries
+[33m23f12cc[m HEAD@{17}: commit: feat(api): develop server fetch pipelines and CRUD mutation actions for ebook entities
+[33m4677c9c[m HEAD@{18}: commit: feat(auth): connect email sign-up and sign-in interfaces to BetterAuth client methods
+[33m73c54ba[m HEAD@{19}: commit: feat(ui): design high-contrast user, writer, and administrative homes with custom SVG metrics charts
+[33me66afa1[m HEAD@{20}: commit: feat(ui): implement dynamic workspace sidebar layouts supporting users, writers, and administrators
+[33m10abdef[m HEAD@{21}: commit: feat(ui): implement responsive authentication screens for signup and signin with custom role toggles
+[33mc547257[m HEAD@{22}: commit: feat(ui): implement responsive ebook details page with premium mock cover and purchase CTAs
+[33m4fae53b[m HEAD@{23}: commit: feat(ui): design browse ebooks catalog interface with grids and modular filter panels
+[33m4e5c341[m HEAD@{24}: commit: feat(ui): create Landing components for Featured Ebooks, Genres, and Top Writers
+[33m0fdc899[m HEAD@{25}: commit: feat(ui): implement main landing route and custom animated hero component
+[33m87777e2[m HEAD@{26}: commit: feat(ui): design global dark mode style core and shell navbar and footer
+[33m6d324e5[m HEAD@{27}: commit: chore: install frontend dependencies and setup project
+[33mdec68a8[m HEAD@{28}: Branch: renamed refs/heads/master to refs/heads/main
+[33mdec68a8[m HEAD@{30}: commit (initial): chore: initialize project environment configuration and dependencies

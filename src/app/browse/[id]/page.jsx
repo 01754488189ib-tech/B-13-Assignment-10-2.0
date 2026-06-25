@@ -31,6 +31,7 @@ export default async function EbookDetailsPage({ params }) {
   const user = await getUserSession();
   const isWriter = user && user.id === ebook.writerId;
   const isSold = ebook.status === "Sold";
+  const isAdmin = user?.role === "admin";
 
   let initialBookmarked = false;
   if (user) {
@@ -212,11 +213,13 @@ export default async function EbookDetailsPage({ params }) {
                 initialBookmarked={initialBookmarked}
               />
 
-              {isSold && (
+              {(isSold || isAdmin) && (
                 <div className="p-4 bg-emerald-950/20 border border-emerald-500/10 rounded-xl text-xs text-emerald-400 leading-relaxed">
-                  <strong>Access Granted:</strong> Thank you for purchasing this
-                  original masterpiece! You can access or read it anytime inside
-                  your Seeker Dashboard workspace.
+                  <strong>Access Granted:</strong> Thank you for supporting
+                  independent literature.
+                  {isAdmin
+                    ? " As a System Administrator, you have unrestricted reading bypass access to review this manuscript's content."
+                    : " You have unlocked this ebook and can read its full content freely inside your personal bookshelf."}
                 </div>
               )}
             </div>

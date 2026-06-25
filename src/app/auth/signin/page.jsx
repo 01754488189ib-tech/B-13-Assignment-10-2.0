@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Card, Button } from "@heroui/react";
-import { Eye, EyeSlash, At, ShieldKeyhole } from "@gravity-ui/icons";
+import { At, ShieldKeyhole, Eye, EyeSlash } from "@gravity-ui/icons";
 import { authClient } from "@/lib/auth-client";
 
 export default function SigninPage() {
@@ -17,13 +17,36 @@ export default function SigninPage() {
 
   const toggleVisibility = () => setIsVisible((prev) => !prev);
 
+  const triggerEasyLogin = async (targetEmail, targetPassword) => {
+    setIsLoading(true);
+    setErrorMessage("");
+    try {
+      const { error } = await authClient.signIn.email({
+        email: targetEmail,
+        password: targetPassword,
+        callbackURL: "/",
+      });
+
+      if (error) {
+        setErrorMessage(error.message || "Failed to log in easy login user.");
+      } else {
+        router.push("/");
+        router.refresh();
+      }
+    } catch (err) {
+      setErrorMessage("System network communication error.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage("");
 
     try {
-      const { data, error } = await authClient.signIn.email({
+      const { error } = await authClient.signIn.email({
         email,
         password,
         callbackURL: "/",
@@ -69,14 +92,38 @@ export default function SigninPage() {
           </p>
         </div>
 
-        {/* Error Alert panel */}
         {errorMessage && (
           <div className="mb-4 p-3.5 text-xs font-semibold rounded-xl bg-red-500/10 border border-red-500/20 text-red-400">
             {errorMessage}
           </div>
         )}
 
-        {/* Google Authentication Trigger */}
+        <div className="mb-6 space-y-2">
+          <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest block mb-2">
+            Demo Portal Access
+          </span>
+          <div className="flex flex-row gap-2 w-full justify-between">
+            <Button
+              onClick={() => triggerEasyLogin("reader@fable.com", "Reader@123")}
+              className="flex-1 bg-white/5 hover:bg-white/10 text-white text-[11px] font-bold py-2 rounded-xl border border-white/5 h-10 px-2"
+            >
+              As Reader
+            </Button>
+            <Button
+              onClick={() => triggerEasyLogin("writer@fable.com", "Writer@123")}
+              className="flex-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[11px] font-bold py-2 rounded-xl border border-amber-500/10 h-10 px-2"
+            >
+              As Writer
+            </Button>
+            <Button
+              onClick={() => triggerEasyLogin("admin@fable.com", "Admin@123")}
+              className="flex-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 text-[11px] font-bold py-2 rounded-xl border border-purple-500/10 h-10 px-2"
+            >
+              As Admin
+            </Button>
+          </div>
+        </div>
+
         <Button
           onClick={handleGoogleLogin}
           variant="bordered"
@@ -130,11 +177,9 @@ export default function SigninPage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-zinc-400">
-                Password
-              </label>
-            </div>
+            <label className="text-xs font-semibold text-zinc-400">
+              Password
+            </label>
             <div className="relative flex items-center bg-white/[0.02] border border-white/5 rounded-xl px-3.5 h-12 focus-within:border-amber-500/50 transition">
               <ShieldKeyhole className="text-zinc-500 shrink-0 mr-3" />
               <input

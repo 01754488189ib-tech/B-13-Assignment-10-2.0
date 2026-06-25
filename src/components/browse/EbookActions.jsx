@@ -14,6 +14,7 @@ export default function EbookActions({
 }) {
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
   const [loading, setLoading] = useState(false);
+  const isAdmin = user?.role === "admin";
 
   async function handleBookmark() {
     if (!user) {
@@ -38,7 +39,7 @@ export default function EbookActions({
   return (
     <div className="flex gap-3 flex-wrap sm:flex-nowrap">
       <Button
-        disabled={loading}
+        disabled={loading || isAdmin}
         onClick={handleBookmark}
         variant="bordered"
         className={`h-14 px-5 rounded-2xl transition border-white/10 ${
@@ -48,14 +49,25 @@ export default function EbookActions({
         }`}
       >
         <Bookmark className="w-5 h-5" />
-        {isBookmarked ? "Bookmarked" : "Bookmark Ebook"}
+        {isAdmin
+          ? "Admin View"
+          : isBookmarked
+            ? "Bookmarked"
+            : "Bookmark Ebook"}
       </Button>
 
       <form action="/api/checkout_sessions" method="POST" className="w-full">
         <input type="hidden" name="checkout_type" value="purchase" />
         <input type="hidden" name="ebook_id" value={ebookId} />
 
-        {isSold ? (
+        {isAdmin ? (
+          <Button
+            disabled
+            className="w-full h-14 rounded-2xl text-sm font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 cursor-not-allowed"
+          >
+            Admin Access Enabled
+          </Button>
+        ) : isSold ? (
           <Button
             disabled
             className="w-full h-14 rounded-2xl text-sm font-bold bg-zinc-800 text-zinc-500 border border-zinc-700/50 cursor-not-allowed"

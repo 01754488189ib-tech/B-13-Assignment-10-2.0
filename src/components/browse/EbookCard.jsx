@@ -9,11 +9,18 @@ export default function EbookCard({ ebook }) {
   return (
     <Card className="group relative overflow-hidden border border-white/5 bg-[#0b0b0f] p-4 rounded-[20px] transition-all hover:border-white/10 hover:shadow-2xl">
       <Link href={`/browse/${ebook.id}`} className="block">
-        {/* Cover Thumbnail Representation */}
         <div
-          className={`relative aspect-[3/4] w-full rounded-xl bg-gradient-to-br ${ebook.coverGradient || "from-zinc-800 to-zinc-900"} p-5 flex flex-col justify-between overflow-hidden shadow-md`}
+          className={`relative aspect-[3/4] w-full rounded-xl bg-gradient-to-br ${ebook.coverGradient || "from-amber-600 via-orange-700 to-red-800"} p-5 flex flex-col justify-between overflow-hidden shadow-md`}
         >
-          <div className="absolute inset-0 bg-[radial-gradient(#ffffff03_1px,transparent_1px)] [background-size:12px_12px]" />
+          {ebook.coverImage ? (
+            <img
+              src={ebook.coverImage}
+              alt={ebook.title}
+              className="absolute inset-0 w-full h-full object-cover z-0"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-[radial-gradient(#ffffff03_1px,transparent_1px)] [background-size:12px_12px]" />
+          )}
 
           <div className="flex justify-between items-start relative z-10">
             <span className="rounded-full bg-black/60 backdrop-blur-md px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
@@ -37,7 +44,6 @@ export default function EbookCard({ ebook }) {
         </div>
       </Link>
 
-      {/* Meta Content Row */}
       <div className="mt-4">
         <Link href={`/browse/${ebook.id}`}>
           <h3 className="font-bold text-zinc-100 text-sm tracking-tight hover:text-amber-400 transition truncate">
@@ -47,12 +53,11 @@ export default function EbookCard({ ebook }) {
         <p className="text-xs text-zinc-500 mt-1">
           By{" "}
           <span className="hover:text-amber-400 transition cursor-pointer font-medium">
-            {ebook.writer}
+            {ebook.writerName || ebook.writer || "Independent Author"}
           </span>
         </p>
       </div>
 
-      {/* Price & Action Row */}
       <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
         <span className="text-base font-black text-amber-500">
           ${ebook.price.toFixed(2)}

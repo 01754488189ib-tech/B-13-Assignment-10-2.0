@@ -6,11 +6,8 @@ import {
   House,
   BookOpen,
   Bookmark,
-  CircleArrowDownFill,
   Person,
   Gear,
-  Briefcase,
-  Envelope,
   Persons,
   CreditCard,
 } from "@gravity-ui/icons";
@@ -46,6 +43,7 @@ export default function DashboardSidebar({ userRole = "user" }) {
       icon: CreditCard,
     },
     { label: "Bookmarks", href: "/dashboard/writer/bookmarks", icon: Bookmark },
+    { label: "Profile", href: "/dashboard/writer/profile", icon: Person },
   ];
 
   const adminLinks = [
@@ -61,6 +59,7 @@ export default function DashboardSidebar({ userRole = "user" }) {
       href: "/dashboard/admin/transactions",
       icon: CreditCard,
     },
+    { label: "Profile", href: "/dashboard/admin/profile", icon: Person },
   ];
 
   const roleLinksMap = {
@@ -108,11 +107,11 @@ export default function DashboardSidebar({ userRole = "user" }) {
 
       <div className="border-t border-white/5 pt-6 mt-8">
         <Link
-          href="/settings"
+          href="/"
           className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-zinc-500 hover:text-white transition duration-200"
         >
           <Gear className="w-4 h-4" />
-          Settings
+          Back to Home
         </Link>
       </div>
     </aside>
